@@ -18,6 +18,24 @@ MySQL, with live geocoding and distance-based fare calculation.
   <img alt="MySQL"        src="https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white">
 </p>
 
+### 🔗 Live demo — **[taxihub-stuttgart.vercel.app](https://taxihub-stuttgart.vercel.app)**
+
+The public booking site, deployed on Vercel. It is the **frontend only**: the
+Spring Boot backend and its MySQL database cannot run on Vercel's serverless
+platform, so they are not behind this URL.
+
+| On the live URL | Status |
+| --- | --- |
+| Landing page, booking wizard UI, all five steps | ✅ Works |
+| TR / DE / EN language switching | ✅ Works |
+| Progress saved across a page reload | ✅ Works |
+| Address lookup, fare calculation, booking submission | ⚠️ Need the backend — see below |
+| Staff back office | ❌ Server-rendered by Spring Boot, local only |
+
+To see the whole system — back office included — run it locally in about five
+minutes: [Running it locally](#running-it-locally), then
+[How to access the sites](#how-to-access-the-sites).
+
 ---
 
 ## Table of contents
@@ -299,6 +317,10 @@ the deployment splits cleanly in two:
 | Spring Boot app + MySQL (admin panel, all APIs) | Any JVM host: Railway, Render, Fly.io, a VPS, or your own machine |
 
 ### Deploying the booking site to Vercel
+
+The booking site is already live at
+**[taxihub-stuttgart.vercel.app](https://taxihub-stuttgart.vercel.app)**. To
+deploy your own copy:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YunusEmre3/taxihub-stuttgart)
 
