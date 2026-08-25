@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{verifyEmail.pageTitle}">Hesap Doğrulama - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}"/>
+</head>
+<body>
+
+<div class="auth-card">
+    <div th:replace="~{fragments/header :: brand-header(#{verifyEmail.subtitle})}"></div>
+
+    <div class="auth-card__body">
+        <h1 class="auth-card__title" th:text="#{verifyEmail.title}">E-postanı Doğrula</h1>
+
+        <div class="alert alert-info">
+            <span th:text="#{verifyEmail.instructions}"></span>
+            <strong th:text="${verifyEmailForm.email}"></strong><br/>
+            <span th:text="#{verifyEmail.validityNote(${codeValidityMinutes})}"></span>
+        </div>
+
+        <div class="alert alert-success" th:if="${successMessageKey}" th:text="#{__${successMessageKey}__}"></div>
+
+        <form th:action="@{/verify-email}" th:object="${verifyEmailForm}" method="post">
+            <input type="hidden" th:field="*{email}"/>
+
+            <div class="form-group">
+                <label for="code" th:text="#{verifyEmail.code}">Doğrulama Kodu</label>
+                <input type="text" id="code" th:field="*{code}" inputmode="numeric" maxlength="6"
+                       autocomplete="one-time-code" placeholder="123456" autofocus/>
+                <div class="field-error" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></div>
+            </div>
+
+            <button type="submit" class="btn-primary" th:text="#{verifyEmail.submit}">Doğrula</button>
+        </form>
+
+        <form th:action="@{/verify-email/resend}" method="post" style="margin-top:12px;">
+            <input type="hidden" name="email" th:value="${verifyEmailForm.email}"/>
+            <button type="submit" class="btn-primary" style="background:#eee;color:#111;" th:text="#{verifyEmail.resend}">Kodu Tekrar Gönder</button>
+        </form>
+
+        <div class="auth-links auth-links--center">
+            <a th:href="@{/login}" th:text="#{common.backToLogin}">Giriş sayfasına dön</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

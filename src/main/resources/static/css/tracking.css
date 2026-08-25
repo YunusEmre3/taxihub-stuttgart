@@ -1,0 +1,194 @@
+/* Extends dashboard.css (sidebar/topbar/panel/badge/button/color variables
+   already come from there) with the booking-tracking layout: an info panel
+   plus a large map with a small dashcam preview floating over it. */
+
+.tracking-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    align-items: start;
+    height: calc(100vh - var(--topbar-height) - 56px);
+    min-height: 480px;
+}
+
+.tracking-info {
+    background: var(--th-white);
+    border: 1px solid var(--th-border);
+    border-radius: 10px;
+    padding: 18px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.tracking-info__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.tracking-info__code {
+    font-size: 12.5px;
+    color: var(--th-gray);
+    font-weight: 700;
+}
+
+.tracking-info__title {
+    font-size: 19px;
+    font-weight: 800;
+    margin: 4px 0 18px;
+}
+
+.tracking-row {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--th-border);
+}
+
+.tracking-row:last-child {
+    border-bottom: none;
+}
+
+.tracking-row__label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--th-gray);
+    font-weight: 700;
+}
+
+.tracking-row__value {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.tracking-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.tracking-stat {
+    background: var(--th-light-gray);
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.tracking-stat__label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    color: var(--th-gray);
+    font-weight: 700;
+}
+
+.tracking-stat__value {
+    font-size: 16px;
+    font-weight: 800;
+    margin-top: 2px;
+}
+
+.tracking-route-status {
+    display: none;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-top: 12px;
+    background: #FCE4E4;
+    color: var(--th-red);
+}
+
+.tracking-route-status.visible {
+    display: block;
+}
+
+/* ---- Map + dashcam overlay ---- */
+
+.tracking-map-wrap {
+    position: relative;
+    height: 100%;
+}
+
+#trackingMap {
+    height: 100%;
+    min-height: 480px;
+    border-radius: 10px;
+    border: 1px solid var(--th-border);
+    background: var(--th-light-gray);
+}
+
+.dashcam-overlay {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 220px;
+    background: var(--th-black);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    z-index: 500;
+}
+
+.dashcam-overlay__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.dashcam-overlay__label {
+    color: var(--th-white);
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dashcam-overlay__label::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #E53935;
+}
+
+.dashcam-overlay__close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 4px;
+}
+
+.dashcam-overlay__close:hover {
+    color: var(--th-white);
+}
+
+.dashcam-overlay img {
+    display: block;
+    width: 100%;
+    height: 124px;
+    object-fit: cover;
+}
+
+.dashcam-overlay.hidden {
+    display: none;
+}
+
+.dispatch-marker-driver {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--th-white);
+    border: 3px solid var(--th-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}

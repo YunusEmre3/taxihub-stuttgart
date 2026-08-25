@@ -1,0 +1,49 @@
+# ==== Secrets ====
+# Never commit real credentials. Use .env.example as the template.
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+
+# ==== Java / Maven build output ====
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ==== JVM crash dumps ====
+# Contain absolute local paths and JVM/process state - never useful in git.
+hs_err_pid*.log
+replay_pid*.log
+*.hprof
+
+# ==== Node / Vite ====
+frontend/node_modules/
+frontend/dist/
+npm-debug.log*
+yarn-error.log*
+
+# ==== Vite build output ====
+# `npm run build` in frontend/ emits these straight into Spring Boot's static
+# folder (see frontend/vite.config.js). Generated artifacts, not sources - the
+# hand-written admin-panel assets in static/css, static/js and static/images
+# stay tracked.
+src/main/resources/static/index.html
+src/main/resources/static/assets/
+src/main/resources/static/favicon.svg
+src/main/resources/static/icons.svg
+
+# ==== IDE / OS ====
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+.DS_Store
+Thumbs.db
+
+# ==== Tooling ====
+.claude/
+.vercel/

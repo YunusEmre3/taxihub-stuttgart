@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{customers.pageTitle}">Customers - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/customers.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('customers', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h1 class="page-title" style="margin:0;" th:text="#{customers.title}">Customer Database</h1>
+            <button type="button" class="btn btn-yellow" id="openAddCustomerBtn" th:text="#{customers.addNew}">Add New Customer</button>
+        </div>
+
+        <div class="alert alert-success" th:if="${successMessageKey}" th:text="#{__${successMessageKey}__}"
+             style="background:#E3F5E5;color:#2E7D32;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;"></div>
+        <div class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"
+             style="background:#FDECEA;color:#D32F2F;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;"></div>
+
+        <div class="panel">
+            <div class="panel__header">
+                <h2 class="panel__title" th:text="#{customers.title}">Müşteri Veritabanı</h2>
+                <div class="panel__controls">
+                    <select id="accountTypeFilter">
+                        <option value="ALL" th:text="#{customers.filter.allTypes}">All Types</option>
+                        <option th:each="type : ${accountTypes}" th:value="${type}" th:text="#{__${'enum.accountType.' + type}__}"></option>
+                    </select>
+                    <input type="text" id="customerSearchBox" th:placeholder="#{customers.searchPlaceholder}"/>
+                </div>
+            </div>
+
+            <table class="data-table" th:if="${not #lists.isEmpty(customers)}">
+                <thead>
+                <tr>
+                    <th th:text="#{customers.table.id}">Customer ID</th>
+                    <th th:text="#{customers.table.name}">Name</th>
+                    <th th:text="#{customers.table.phone}">Phone</th>
+                    <th th:text="#{customers.table.email}">Email</th>
+                    <th th:text="#{customers.table.totalRides}">Total Rides</th>
+                    <th th:text="#{customers.table.lastRide}">Last Ride</th>
+                    <th th:text="#{customers.table.accountType}">Account Type</th>
+                    <th th:text="#{customers.table.action}">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="customer : ${customers}"
+                    th:with="noRidesText=#{customers.table.noRidesYet}"
+                    th:data-account-type="${customer.accountType.name()}"
+                    th:data-search="${#strings.toLowerCase(customer.firstName + ' ' + customer.lastName + ' ' + customer.email + ' ' + (customer.phoneNumber ?: ''))}">
+                    <td th:text="${customer.id}">1</td>
+                    <td th:text="${customer.firstName + ' ' + customer.lastName}">Ad Soyad</td>
+                    <td th:text="${customer.phoneNumber ?: '-'}">-</td>
+                    <td th:text="${customer.email}">mail@example.com</td>
+                    <td th:text="${customer.totalRides}">0</td>
+                    <td th:text="${customer.lastRideAt != null ? #temporals.format(customer.lastRideAt, 'dd.MM.yyyy HH:mm') : noRidesText}">-</td>
+                    <td>
+                        <span class="badge" th:classappend="${customer.accountType.name() == 'CORPORATE'} ? 'badge-corporate' : 'badge-personal'"
+                              th:text="#{__${'enum.accountType.' + customer.accountType}__}">Personal</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/customers/{id}/edit(id=${customer.id})}" class="btn btn-yellow btn-small" th:text="#{customers.table.viewEdit}">View / Edit</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(customers)}" th:text="#{customers.table.noCustomersYet}">Henüz müşteri yok.</div>
+        </div>
+    </div>
+</main>
+
+<!-- Add New Customer modalı -->
+<div class="modal-overlay" id="addCustomerModal" th:classappend="${openAddModal} ? 'open'">
+    <div class="modal-box">
+        <h3 class="modal-box__title" th:text="#{customers.modal.addTitle}">Yeni Müşteri Ekle</h3>
+
+        <form th:action="@{/customers}" th:object="${customerForm}" method="post" class="customer-form">
+            <div class="form-group">
+                <label for="firstName" th:text="#{customers.firstName}">Ad</label>
+                <input type="text" id="firstName" th:field="*{firstName}"/>
+                <div class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+            </div>
+            <div class="form-group">
+                <label for="lastName" th:text="#{customers.lastName}">Soyad</label>
+                <input type="text" id="lastName" th:field="*{lastName}"/>
+                <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+            </div>
+            <div class="form-group">
+                <label for="email" th:text="#{customers.email}">E-posta</label>
+                <input type="email" id="email" th:field="*{email}"/>
+                <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            <div class="form-group">
+                <label for="phoneNumber" th:text="#{customers.phone}">Telefon</label>
+                <input type="text" id="phoneNumber" th:field="*{phoneNumber}"/>
+            </div>
+            <div class="form-group">
+                <label for="accountType" th:text="#{customers.accountType}">Hesap Türü</label>
+                <select id="accountType" th:field="*{accountType}">
+                    <option th:each="type : ${accountTypes}" th:value="${type}" th:text="#{__${'enum.accountType.' + type}__}"></option>
+                </select>
+            </div>
+
+            <div class="modal-box__close" style="display:flex;justify-content:space-between;">
+                <button type="button" class="btn btn-outline" id="addCustomerCloseBtn" th:text="#{customers.cancel}">İptal</button>
+                <button type="submit" class="btn btn-yellow" th:text="#{customers.save}">Kaydet</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/customers.js}"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@theme {
+  --color-th-yellow: #FFC107;
+  --color-th-yellow-dark: #E0A800;
+  --color-th-black: #111111;
+  --color-th-gray: #4A4A4A;
+  --color-th-light-gray: #F5F5F5;
+  --color-th-red: #D32F2F;
+  --color-th-green: #2E7D32;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}

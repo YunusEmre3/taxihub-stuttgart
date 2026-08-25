@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{reports.pageTitle}">Reports - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/reports.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('reports', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <div class="reports-filterbar">
+            <h1 class="page-title" style="margin:0;" th:text="#{reports.title}">Operational Reports</h1>
+            <div class="reports-filterbar__spacer"></div>
+            <label for="dateFrom" th:text="#{reports.dateRange}">Date Range</label>
+            <input type="date" id="dateFrom" th:value="${dateFrom}"/>
+            <span>&ndash;</span>
+            <input type="date" id="dateTo" th:value="${dateTo}"/>
+            <select id="vehicleTypeFilter">
+                <option value="" th:text="#{reports.allVehicleTypes}">All Vehicle Types</option>
+                <option th:each="type : ${vehicleTypes}" th:value="${type}" th:text="#{__${'enum.vehicleType.' + type}__}"
+                        th:selected="${selectedVehicleType != null and selectedVehicleType == type}"></option>
+            </select>
+            <button type="button" class="btn btn-yellow" id="exportDataBtn">&#8595; <span th:text="#{reports.exportData}">Export Data</span></button>
+        </div>
+
+        <p class="dispatch-hint" style="color:#6B6B6B;font-size:12.5px;margin:-12px 0 20px;" th:text="#{reports.disclaimer}">
+            Rakamlar gerçek rezervasyon verisinden hesaplanır.
+        </p>
+
+        <!-- Özet istatistikler -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{reports.kpi.avgPassengers}">Average Passengers / Ride</div>
+                <div class="kpi-card__value" id="avgPassengersStat">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{reports.kpi.completionRate}">Completion Rate</div>
+                <div class="kpi-card__value" id="completionRateStat">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{reports.kpi.activeDrivers}">Active Drivers</div>
+                <div class="kpi-card__value" id="activeDriversStat">-</div>
+            </div>
+        </div>
+
+        <!-- Grafikler -->
+        <div class="reports-grid">
+            <div class="chart-panel">
+                <h2 class="chart-panel__title" th:text="#{reports.chart.volumeTrend}">Booking Volume Trend (Monthly)</h2>
+                <canvas id="volumeChart" height="110"></canvas>
+            </div>
+            <div class="chart-panel">
+                <h2 class="chart-panel__title" th:text="#{reports.chart.hourlyVolume}">Ride Volume by Time of Day</h2>
+                <canvas id="hourlyChart" height="110"></canvas>
+            </div>
+            <div class="chart-panel">
+                <h2 class="chart-panel__title" th:text="#{reports.chart.byVehicleType}">Bookings by Vehicle Type</h2>
+                <canvas id="vehicleTypeChart" height="110"></canvas>
+            </div>
+            <div class="chart-panel">
+                <h2 class="chart-panel__title" th:text="#{reports.chart.topDrivers}">Top Drivers by Completed Rides</h2>
+                <canvas id="driverChart" height="110"></canvas>
+                <div class="chart-empty" id="driverChartEmpty" style="display:none;" th:text="#{reports.chart.noCompletedRides}">Bu aralıkta tamamlanmış yolculuk yok.</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/reports.js}"></script>
+</body>
+</html>

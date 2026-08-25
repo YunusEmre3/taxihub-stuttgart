@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{settings.pageTitle}">Settings - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/settings.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('settings', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner" th:with="configuredText=#{settings.configured}, missingText=#{settings.missing}">
+        <h1 class="page-title" th:text="#{settings.title}">System Configuration</h1>
+
+        <div class="alert alert-success" th:if="${successMessageKey}" th:text="#{__${successMessageKey}__}"
+             style="background:#E3F5E5;color:#2E7D32;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;"></div>
+
+        <div class="settings-grid">
+            <!-- SOL: Fiyatlandırma -->
+            <div class="panel">
+                <div class="panel__header">
+                    <h2 class="panel__title" th:text="#{settings.pricingTariffs}">Pricing Tariffs</h2>
+                </div>
+                <p class="settings-hint" th:text="#{settings.pricingHint}">
+                    Bu değerler görüntüleme amaçlı değil.
+                </p>
+
+                <form th:action="@{/settings/pricing}" th:object="${pricingUpdateForm}" method="post">
+                    <table class="data-table pricing-table">
+                        <thead>
+                        <tr>
+                            <th th:text="#{settings.table.vehicleType}">Vehicle Type</th>
+                            <th th:text="#{settings.table.baseFare}">Base Fare (€)</th>
+                            <th th:text="#{settings.table.perKm}">Per KM (€)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="rule, stat : *{rules}">
+                            <td>
+                                <strong th:text="#{__${'enum.vehicleType.' + rule.vehicleType}__}">STANDARD</strong>
+                                <input type="hidden" th:field="*{rules[__${stat.index}__].vehicleType}"/>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" min="0" th:field="*{rules[__${stat.index}__].baseFare}"/>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" min="0" th:field="*{rules[__${stat.index}__].pricePerKm}"/>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top:18px;">
+                        <button type="submit" class="btn btn-yellow" th:text="#{settings.saveChanges}">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- SAĞ: Profil, Sistem Bilgisi, Hizmet Bölgesi -->
+            <div class="settings-side">
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title" th:text="#{settings.myProfile}">My Profile</h2>
+                    </div>
+                    <form th:action="@{/settings/profile}" th:object="${profileForm}" method="post" class="settings-form">
+                        <div class="form-group">
+                            <label for="firstName" th:text="#{settings.firstName}">Ad</label>
+                            <input type="text" id="firstName" th:field="*{firstName}"/>
+                            <div class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName" th:text="#{settings.lastName}">Soyad</label>
+                            <input type="text" id="lastName" th:field="*{lastName}"/>
+                            <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                        </div>
+                        <p class="settings-hint" style="margin-bottom:12px;">
+                            <span th:text="#{settings.emailHint.part1}"></span>
+                            <a th:href="@{/forgot-password}" th:text="#{settings.forgotPasswordLink}">Şifremi Unuttum</a>
+                            <span th:text="#{settings.emailHint.part2}"></span>
+                        </p>
+                        <button type="submit" class="btn btn-yellow" th:text="#{settings.save}">Save</button>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title" th:text="#{settings.apiIntegrations}">API Integrations &amp; System Info</h2>
+                    </div>
+                    <p class="settings-hint" th:text="#{settings.apiHint}">
+                        Güvenlik gereği API anahtarları bu ekrandan düzenlenemez.
+                    </p>
+                    <div class="info-list">
+                        <div class="info-row">
+                            <span class="info-row__label" th:text="#{settings.orsKey}">OpenRouteService Key</span>
+                            <span>
+                                <span class="info-badge" th:classappend="${orsKeyConfigured} ? 'info-badge--ok' : 'info-badge--missing'"
+                                      th:text="${orsKeyConfigured} ? configuredText : missingText">Yapılandırılmış</span>
+                                <span class="info-row__value" th:text="${orsKeyMasked}"></span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row__label" th:text="#{settings.resendKey}">Resend (E-posta) Key</span>
+                            <span>
+                                <span class="info-badge" th:classappend="${resendKeyConfigured} ? 'info-badge--ok' : 'info-badge--missing'"
+                                      th:text="${resendKeyConfigured} ? configuredText : missingText">Yapılandırılmış</span>
+                                <span class="info-row__value" th:text="${resendKeyMasked}"></span>
+                            </span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row__label" th:text="#{settings.emailDomain}">Kayıt/Giriş E-posta Domaini</span>
+                            <span class="info-row__value" th:text="'@' + ${companyEmailDomain}"></span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-row__label" th:text="#{settings.appBaseUrl}">App Base URL</span>
+                            <span class="info-row__value" th:text="${appBaseUrl}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel__header">
+                        <h2 class="panel__title" th:text="#{settings.serviceArea}">Service Area</h2>
+                    </div>
+                    <div id="serviceAreaMap"></div>
+                    <p class="settings-hint" style="margin-top:10px;margin-bottom:0;" th:text="#{settings.serviceAreaHint}">Stuttgart ve çevresi.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/settings.js}"></script>
+</body>
+</html>

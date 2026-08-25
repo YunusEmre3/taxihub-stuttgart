@@ -1,0 +1,52 @@
+/* Extends dashboard.css (.panel, .data-table, .badge, .btn, .modal-overlay
+   already come from there) with the two account-type pills this page needs. */
+
+.badge-personal {
+    background: #EEEEEE;
+    color: #555;
+}
+
+.badge-corporate {
+    background: #FFF3D6;
+    color: #97650B;
+}
+
+.customer-form .form-group {
+    margin-bottom: 16px;
+}
+
+.customer-form label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--th-gray);
+    margin-bottom: 6px;
+}
+
+.customer-form input,
+.customer-form select {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--th-border);
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-family: inherit;
+}
+
+.customer-form input:focus,
+.customer-form select:focus {
+    outline: none;
+    border-color: var(--th-yellow);
+    box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.2);
+}
+
+.customer-form input[readonly] {
+    background: var(--th-light-gray);
+    color: var(--th-gray);
+}
+
+.customer-form .field-error {
+    color: var(--th-red);
+    font-size: 12px;
+    margin-top: 4px;
+}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{adminDashboard.pageTitle}">Admin Dashboard - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('dashboard', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <h1 class="page-title" th:text="#{adminDashboard.title}">Admin Dashboard</h1>
+
+        <!-- KPI Kartları -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{adminDashboard.kpi.totalBookingsToday}">Total Bookings Today</div>
+                <div class="kpi-card__value" th:text="${kpis.totalBookingsToday}">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{adminDashboard.kpi.activeTrips}">Active Trips</div>
+                <div class="kpi-card__value" th:text="${kpis.activeTrips}">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{adminDashboard.kpi.employeesOnline}">Employees Online</div>
+                <div class="kpi-card__value" th:text="${kpis.employeesOnline}">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{adminDashboard.kpi.pendingApprovals}">Pending Approvals</div>
+                <div class="kpi-card__value" th:text="${kpis.pendingApprovals}">0</div>
+            </div>
+        </div>
+
+        <!-- Rezervasyon tablosu -->
+        <div class="panel">
+            <div class="panel__header">
+                <h2 class="panel__title" th:text="#{adminDashboard.todaysBookings}">Today's Bookings</h2>
+                <div class="panel__controls">
+                    <select id="statusFilter">
+                        <option value="ALL" th:text="#{booking.filter.allStatus}">All Status</option>
+                        <option value="PENDING" th:text="#{enum.bookingStatus.PENDING}">Pending</option>
+                        <option value="ASSIGNED" th:text="#{enum.bookingStatus.ASSIGNED}">Assigned</option>
+                        <option value="IN_PROGRESS" th:text="#{enum.bookingStatus.IN_PROGRESS}">In Progress</option>
+                        <option value="COMPLETED" th:text="#{enum.bookingStatus.COMPLETED}">Completed</option>
+                        <option value="CANCELLED" th:text="#{enum.bookingStatus.CANCELLED}">Cancelled</option>
+                    </select>
+                    <input type="text" id="searchBox" th:placeholder="#{booking.table.searchPlaceholder}"/>
+                </div>
+            </div>
+
+            <table class="data-table" th:if="${not #lists.isEmpty(bookings)}">
+                <thead>
+                <tr>
+                    <th th:text="#{booking.table.id}">Booking ID</th>
+                    <th th:text="#{booking.table.customerName}">Customer Name</th>
+                    <th th:text="#{booking.table.email}">Email</th>
+                    <th th:text="#{booking.table.phone}">Phone</th>
+                    <th th:text="#{booking.table.dateTime}">Date/Time</th>
+                    <th th:text="#{booking.table.pickupAddress}">Pickup Address</th>
+                    <th th:text="#{booking.table.dropoffAddress}">Drop-off Address</th>
+                    <th th:text="#{booking.table.vehicleType}">Vehicle Type</th>
+                    <th th:text="#{booking.table.passengerLuggage}">Passenger/Luggage</th>
+                    <th th:text="#{booking.table.assignedEmployee}">Assigned Employee</th>
+                    <th th:text="#{booking.table.status}">Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="booking : ${bookings}"
+                    th:with="noNoteText=#{booking.table.noNote}"
+                    th:data-status="${booking.status.name()}"
+                    th:data-search="${#strings.toLowerCase(booking.firstName + ' ' + booking.lastName + ' ' + booking.email + ' ' + booking.phoneNumber + ' ' + booking.pickupAddress + ' ' + booking.dropoffAddress + ' ' + booking.bookingCode)}">
+                    <td th:text="${booking.bookingCode}">PNR2283</td>
+                    <td th:text="${booking.firstName + ' ' + booking.lastName}">Ad Soyad</td>
+                    <td th:text="${booking.email}">mail@example.com</td>
+                    <td th:text="${booking.phoneNumber}">0151 000000</td>
+                    <td th:text="${#temporals.format(booking.bookingDate, 'dd.MM.yyyy') + ' ' + #temporals.format(booking.bookingTime, 'HH:mm')}">01.01.2026 10:00</td>
+                    <td th:text="${booking.pickupAddress}">Abholort</td>
+                    <td th:text="${booking.dropoffAddress}">Zielort</td>
+                    <td th:text="#{__${'enum.vehicleType.' + booking.vehicleType}__}">STANDARD</td>
+                    <td th:text="${booking.passengerCount + ' / ' + booking.luggageCount}">2 / 1</td>
+                    <td th:text="${booking.assignedEmployee != null ? booking.assignedEmployee.firstName + ' ' + booking.assignedEmployee.lastName : '-'}">-</td>
+                    <td><span class="badge" th:classappend="${booking.status.cssClass}" th:text="#{__${'enum.bookingStatus.' + booking.status}__}">Pending</span></td>
+                    <td style="white-space:nowrap;">
+                        <button type="button" class="btn btn-outline btn-small btn-detail"
+                                th:attr="data-message=${booking.customerMessage != null ? booking.customerMessage : noNoteText},
+                                          data-name=${booking.firstName + ' ' + booking.lastName},
+                                          data-code=${booking.bookingCode}"
+                                th:text="#{booking.table.detail}">
+                            Detay
+                        </button>
+                        <a th:href="@{/bookings/{id}(id=${booking.id})}" class="btn btn-outline btn-small" th:text="#{booking.table.track}">İzle</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(bookings)}" th:text="#{booking.table.noBookingsYet}">Henüz rezervasyon yok.</div>
+        </div>
+    </div>
+</main>
+
+<!-- Detay modalı: satırdaki customer_message burada gösterilir -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal-box">
+        <h3 class="modal-box__title" th:text="#{booking.detailModal.title}">Müşteri Notu</h3>
+        <p class="modal-box__subtitle" id="modalSubtitle"></p>
+        <div class="modal-box__message" id="modalMessage"></div>
+        <div class="modal-box__close">
+            <button type="button" class="btn btn-outline" id="modalCloseBtn" th:text="#{common.close}">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{login.pageTitle}">Giriş Yap - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}"/>
+</head>
+<body>
+
+<div class="auth-card">
+    <div th:replace="~{fragments/header :: brand-header(#{login.subtitle})}"></div>
+
+    <div class="auth-card__body">
+        <h1 class="auth-card__title" th:text="#{login.title}">Giriş Yap</h1>
+
+        <div class="alert alert-error" th:if="${errorMessageKey}">
+            <span th:text="#{__${errorMessageKey}__}"></span>
+            <a th:if="${unverifiedEmail}" th:href="@{/verify-email(email=${unverifiedEmail})}" th:text="#{login.enterVerificationCode}">Doğrulama kodunu gir</a>
+        </div>
+        <div class="alert alert-info" th:if="${infoMessageKey}" th:text="#{__${infoMessageKey}__}"></div>
+        <div class="alert alert-success" th:if="${param.resetSuccess}" th:text="#{auth.success.passwordReset}"></div>
+        <div class="alert alert-success" th:if="${param.verified}" th:text="#{auth.success.emailVerified}"></div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="email" th:text="#{login.email}">İş E-postası</label>
+                <input type="email" id="email" name="email" placeholder="ad.soyad@stuttgart-taxi.com" required autofocus/>
+            </div>
+
+            <div class="form-group">
+                <label for="password" th:text="#{login.password}">Şifre</label>
+                <input type="password" id="password" name="password" required/>
+            </div>
+
+            <button type="submit" class="btn-primary" th:text="#{login.submit}">Giriş Yap</button>
+        </form>
+
+        <div class="auth-links">
+            <a th:href="@{/forgot-password}" th:text="#{login.forgotPassword}">Şifremi Unuttum</a>
+            <a th:href="@{/register}" th:text="#{login.createAccount}">Hesap Oluştur</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

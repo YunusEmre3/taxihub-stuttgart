@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{tracking.pageTitlePrefix} + ${booking.bookingCode} + #{tracking.pageTitleSuffix}">Booking - TaxiHub Stuttgart</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/tracking.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('bookings', ${dashboardUrl}, true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, ${roleLabel})}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <h1 class="page-title" th:text="#{tracking.title}">Live Tracking</h1>
+
+        <div class="alert alert-success" th:if="${justCreated}" th:text="#{tracking.justCreated}"
+             style="background:#E3F5E5;color:#2E7D32;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;"></div>
+
+        <div class="tracking-layout">
+            <!-- Rezervasyon özeti -->
+            <div class="tracking-info">
+                <div class="tracking-info__header">
+                    <span class="tracking-info__code" th:text="'#' + ${booking.bookingCode}">#PNR2283</span>
+                    <button type="button" class="btn btn-outline btn-small pnr-copy-btn"
+                            th:attr="data-code=${booking.bookingCode}" th:text="#{common.copy}">Kopyala</button>
+                    <span class="badge" th:classappend="${booking.status.cssClass}" th:text="#{__${'enum.bookingStatus.' + booking.status}__}">In Progress</span>
+                </div>
+                <h2 class="tracking-info__title" th:text="${booking.firstName + ' ' + booking.lastName}">Ad Soyad</h2>
+
+                <div class="tracking-row">
+                    <div class="tracking-row__label" th:text="#{tracking.customer}">Müşteri</div>
+                    <div class="tracking-row__value" th:text="${booking.firstName + ' ' + booking.lastName}">Ad Soyad</div>
+                </div>
+                <div class="tracking-row">
+                    <div class="tracking-row__label" th:text="#{tracking.driver}">Sürücü</div>
+                    <div class="tracking-row__value"
+                         th:text="${booking.assignedEmployee != null ? booking.assignedEmployee.firstName + ' ' + booking.assignedEmployee.lastName : #messages.msg('tracking.driverUnassigned')}">-</div>
+                </div>
+                <div class="tracking-row">
+                    <div class="tracking-row__label" th:text="#{tracking.vehicleType}">Araç Tipi</div>
+                    <div class="tracking-row__value" th:text="#{__${'enum.vehicleType.' + booking.vehicleType}__}">STANDARD</div>
+                </div>
+                <div class="tracking-row">
+                    <div class="tracking-row__label" th:text="#{tracking.pickup}">Alış (Pickup)</div>
+                    <div class="tracking-row__value" th:text="${booking.pickupAddress}">-</div>
+                </div>
+                <div class="tracking-row">
+                    <div class="tracking-row__label" th:text="#{tracking.dropoff}">Varış (Drop-off)</div>
+                    <div class="tracking-row__value" th:text="${booking.dropoffAddress}">-</div>
+                </div>
+
+                <div class="tracking-stats">
+                    <div class="tracking-stat">
+                        <div class="tracking-stat__label" th:text="#{tracking.distance}">Mesafe</div>
+                        <div class="tracking-stat__value" id="trackingDistanceStat" th:text="#{tracking.calculating}">Hesaplanıyor...</div>
+                    </div>
+                    <div class="tracking-stat">
+                        <div class="tracking-stat__label" th:text="#{tracking.duration}">Tahmini Süre</div>
+                        <div class="tracking-stat__value" id="trackingDurationStat" th:text="#{tracking.calculating}">Hesaplanıyor...</div>
+                    </div>
+                    <div class="tracking-stat">
+                        <div class="tracking-stat__label" th:text="#{tracking.price}">Tahmini Fiyat</div>
+                        <div class="tracking-stat__value" id="trackingPriceStat" th:text="#{tracking.calculating}">Hesaplanıyor...</div>
+                    </div>
+                </div>
+
+                <div class="tracking-route-status" id="trackingRouteStatus"></div>
+            </div>
+
+            <!-- Harita + araç kamerası önizlemesi -->
+            <div class="tracking-map-wrap">
+                <div id="trackingMap"
+                     th:attr="data-pickup-address=${booking.pickupAddress},
+                               data-dropoff-address=${booking.dropoffAddress},
+                               data-vehicle-type=${booking.vehicleType},
+                               data-driver-lat=${booking.assignedEmployee != null ? booking.assignedEmployee.currentLat : ''},
+                               data-driver-lng=${booking.assignedEmployee != null ? booking.assignedEmployee.currentLng : ''}"></div>
+
+                <div class="dashcam-overlay" id="dashcamOverlay">
+                    <div class="dashcam-overlay__bar">
+                        <span class="dashcam-overlay__label" th:text="#{tracking.livePreview}">CANLI ÖNİZLEME</span>
+                        <button type="button" class="dashcam-overlay__close" id="dashcamClose" th:aria-label="#{common.close}">&#10005;</button>
+                    </div>
+                    <img th:src="@{/images/dashcam-preview.jpg}" th:alt="#{tracking.dashcamAlt}"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/booking-tracking.js}"></script>
+<script th:inline="javascript">
+    var pnrCopiedLabel = /*[[#{common.copied}]]*/ 'Kopyalandı!';
+    var pnrCopyLabel = /*[[#{common.copy}]]*/ 'Kopyala';
+    document.querySelectorAll('.pnr-copy-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            navigator.clipboard.writeText(btn.getAttribute('data-code')).then(function () {
+                btn.textContent = pnrCopiedLabel;
+                setTimeout(function () { btn.textContent = pnrCopyLabel; }, 1500);
+            });
+        });
+    });
+</script>
+</body>
+</html>

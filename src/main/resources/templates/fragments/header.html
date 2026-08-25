@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="brand-header(subtitle)" class="auth-card__header">
+    <div class="auth-card__top">
+        <div class="auth-card__logo">TAXI<span>HUB</span> STUTTGART</div>
+        <div class="lang-switcher">
+            <a th:href="@{''(lang=tr)}" th:classappend="${#locale.language == 'tr'} ? ' active'">TR</a>
+            <a th:href="@{''(lang=de)}" th:classappend="${#locale.language == 'de'} ? ' active'">DE</a>
+            <a th:href="@{''(lang=en)}" th:classappend="${#locale.language == 'en'} ? ' active'">EN</a>
+        </div>
+    </div>
+    <div class="auth-card__subtitle" th:text="${subtitle}">Kurumsal Personel Portalı</div>
+</div>
+
+</body>
+</html>

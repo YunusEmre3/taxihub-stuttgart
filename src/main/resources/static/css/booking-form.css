@@ -1,0 +1,173 @@
+/* Extends dashboard.css (sidebar/topbar/panel/badge/button/color variables
+   already come from there) with the layout this page needs: a two-column
+   form, a sticky map panel, and a sticky action footer. */
+
+.create-booking-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 24px;
+    align-items: start;
+    padding-bottom: 90px;
+    /* room for the sticky footer bar */
+}
+
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-section__title {
+    font-size: 15px;
+    font-weight: 800;
+    margin: 0 0 16px;
+}
+
+.form-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+}
+
+.form-grid .form-group--full {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--th-gray);
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid var(--th-border);
+    border-radius: 6px;
+    font-size: 13.5px;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--th-yellow);
+    box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.2);
+}
+
+.form-group input[readonly] {
+    background: var(--th-light-gray);
+    color: var(--th-gray);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+.form-group .field-error {
+    color: var(--th-red);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* ---- Map panel ---- */
+
+.map-panel {
+    position: sticky;
+    top: 76px;
+    background: var(--th-white);
+    border: 1px solid var(--th-border);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.map-panel__title {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0 0 10px;
+}
+
+#routeMap {
+    height: 320px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: var(--th-light-gray);
+}
+
+.route-status {
+    display: none;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+}
+
+.route-status.visible {
+    display: block;
+}
+
+.route-status--error {
+    background: #FCE4E4;
+    color: var(--th-red);
+}
+
+.route-status--loading {
+    background: var(--th-light-gray);
+    color: var(--th-gray);
+}
+
+.route-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.route-stat {
+    background: var(--th-light-gray);
+    border-radius: 8px;
+    padding: 10px 12px;
+}
+
+.route-stat__label {
+    font-size: 11px;
+    color: var(--th-gray);
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.route-stat__value {
+    font-size: 16px;
+    font-weight: 800;
+    margin-top: 2px;
+}
+
+/* ---- Sticky action footer ---- */
+
+.form-footer {
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    background: var(--th-white);
+    border-top: 1px solid var(--th-border);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.06);
+    z-index: 15;
+}
+
+.form-footer .btn {
+    padding: 11px 28px;
+}

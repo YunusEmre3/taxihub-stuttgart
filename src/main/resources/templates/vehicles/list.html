@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{vehicles.pageTitle}">Vehicles - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/vehicles.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('vehicles', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h1 class="page-title" style="margin:0;" th:text="#{vehicles.title}">Fleet Management</h1>
+            <button type="button" class="btn btn-yellow" id="openAddVehicleBtn" th:text="#{vehicles.addNew}">Add New Vehicle</button>
+        </div>
+
+        <div class="alert alert-success" th:if="${successMessageKey}" th:text="#{__${successMessageKey}__}"
+             style="background:#E3F5E5;color:#2E7D32;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;"></div>
+        <div class="alert alert-error" th:if="${errorMessage}" th:text="${errorMessage}"
+             style="background:#FDECEA;color:#D32F2F;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13.5px;"></div>
+
+        <!-- KPI Kartları -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{vehicles.kpi.total}">Total Vehicles</div>
+                <div class="kpi-card__value" th:text="${kpis.totalVehicles}">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{vehicles.kpi.inService}">Vehicles in Service</div>
+                <div class="kpi-card__value" th:text="${kpis.inServiceCount}">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{vehicles.kpi.maintenance}">In Maintenance</div>
+                <div class="kpi-card__value" th:text="${kpis.maintenanceCount}">0</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-card__label" th:text="#{vehicles.kpi.unassigned}">Unassigned</div>
+                <div class="kpi-card__value" th:text="${kpis.unassignedCount}">0</div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel__header">
+                <h2 class="panel__title" th:text="#{vehicles.listTitle}">Vehicle List</h2>
+                <div class="panel__controls">
+                    <select id="vehicleStatusFilter">
+                        <option value="ALL" th:text="#{vehicles.filter.allStatus}">All Status</option>
+                        <option value="AVAILABLE" th:text="#{enum.vehicleDisplayStatus.AVAILABLE}">Available</option>
+                        <option value="IN_SERVICE" th:text="#{enum.vehicleDisplayStatus.IN_SERVICE}">In Service</option>
+                        <option value="MAINTENANCE" th:text="#{enum.vehicleDisplayStatus.MAINTENANCE}">Maintenance</option>
+                    </select>
+                    <select id="vehicleTypeFilter">
+                        <option value="ALL" th:text="#{vehicles.filter.allTypes}">All Types</option>
+                        <option th:each="type : ${vehicleTypes}" th:value="${type}" th:text="#{__${'enum.vehicleType.' + type}__}"></option>
+                    </select>
+                    <input type="text" id="vehicleSearchBox" th:placeholder="#{vehicles.searchPlaceholder}"/>
+                </div>
+            </div>
+
+            <table class="data-table" th:if="${not #lists.isEmpty(vehicles)}">
+                <thead>
+                <tr>
+                    <th th:text="#{vehicles.table.plateNumber}">Plate Number</th>
+                    <th th:text="#{vehicles.table.model}">Model</th>
+                    <th th:text="#{vehicles.table.year}">Year</th>
+                    <th th:text="#{vehicles.table.type}">Type</th>
+                    <th th:text="#{vehicles.table.driverAssigned}">Driver Assigned</th>
+                    <th th:text="#{vehicles.table.status}">Status</th>
+                    <th th:text="#{vehicles.table.vin}">VIN</th>
+                    <th th:text="#{vehicles.table.actions}">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="vehicle : ${vehicles}"
+                    th:data-status="${vehicle.displayStatus}"
+                    th:data-vehicle-type="${vehicle.vehicleType.name()}"
+                    th:data-search="${#strings.toLowerCase(vehicle.plateNumber + ' ' + vehicle.model + ' ' + vehicle.vin + ' ' + (vehicle.assignedDriverName ?: ''))}">
+                    <td th:text="${vehicle.plateNumber}">S-TA 1001</td>
+                    <td th:text="${vehicle.model}">Mercedes E-Class</td>
+                    <td th:text="${vehicle.year}">2023</td>
+                    <td th:text="#{__${'enum.vehicleType.' + vehicle.vehicleType}__}">COMFORT</td>
+                    <td th:text="${vehicle.assignedDriverName ?: '-'}">-</td>
+                    <td><span class="badge" th:classappend="${vehicle.displayStatusCssClass}" th:text="#{__${'enum.vehicleDisplayStatus.' + vehicle.displayStatus}__}">Available</span></td>
+                    <td th:text="${vehicle.vin}">WDD2130421A123456</td>
+                    <td>
+                        <a th:href="@{/vehicles/{id}/edit(id=${vehicle.id})}" class="btn btn-yellow btn-small" th:text="#{vehicles.table.viewEdit}">View / Edit</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(vehicles)}" th:text="#{vehicles.table.noVehiclesYet}">Henüz araç yok.</div>
+        </div>
+    </div>
+</main>
+
+<!-- Add New Vehicle modalı -->
+<div class="modal-overlay" id="addVehicleModal" th:classappend="${openAddModal} ? 'open'">
+    <div class="modal-box">
+        <h3 class="modal-box__title" th:text="#{vehicles.modal.addTitle}">Yeni Araç Ekle</h3>
+
+        <form th:action="@{/vehicles}" th:object="${vehicleForm}" method="post" class="vehicle-form">
+            <div class="field-error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" style="margin-bottom:14px;"></div>
+            <div class="vehicle-form-grid">
+                <div class="form-group">
+                    <label for="plateNumber" th:text="#{vehicles.plateNumber}">Plaka</label>
+                    <input type="text" id="plateNumber" th:field="*{plateNumber}" placeholder="S-TA 1001"/>
+                    <div class="field-error" th:if="${#fields.hasErrors('plateNumber')}" th:errors="*{plateNumber}"></div>
+                </div>
+                <div class="form-group">
+                    <label for="year" th:text="#{vehicles.year}">Yıl</label>
+                    <input type="number" id="year" th:field="*{year}"/>
+                    <div class="field-error" th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="model" th:text="#{vehicles.model}">Model</label>
+                <input type="text" id="model" th:field="*{model}" placeholder="Mercedes E-Class"/>
+                <div class="field-error" th:if="${#fields.hasErrors('model')}" th:errors="*{model}"></div>
+            </div>
+            <div class="vehicle-form-grid">
+                <div class="form-group">
+                    <label for="vehicleType" th:text="#{vehicles.type}">Tip</label>
+                    <select id="vehicleType" th:field="*{vehicleType}">
+                        <option value="" th:text="#{vehicles.selectPlaceholder}">-- Seçiniz --</option>
+                        <option th:each="type : ${vehicleTypes}" th:value="${type}" th:text="#{__${'enum.vehicleType.' + type}__}"></option>
+                    </select>
+                    <div class="field-error" th:if="${#fields.hasErrors('vehicleType')}" th:errors="*{vehicleType}"></div>
+                </div>
+                <div class="form-group">
+                    <label for="status" th:text="#{vehicles.status}">Durum</label>
+                    <select id="status" th:field="*{status}">
+                        <option th:each="s : ${statuses}" th:value="${s}" th:text="#{__${'enum.vehicleStatus.' + s}__}"></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="vin" th:text="#{vehicles.vin}">VIN</label>
+                <input type="text" id="vin" th:field="*{vin}" placeholder="WDD2130421A123456" maxlength="17"/>
+                <div class="field-error" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}"></div>
+            </div>
+            <div class="form-group">
+                <label for="assignedDriverId" th:text="#{vehicles.assignDriver}">Sürücü Ata (opsiyonel)</label>
+                <select id="assignedDriverId" th:field="*{assignedDriverId}">
+                    <option value="" th:text="#{vehicles.unassignedOption}">-- Atanmamış --</option>
+                    <option th:each="driver : ${availableDrivers}" th:value="${driver.id}"
+                            th:text="${driver.firstName + ' ' + driver.lastName}"></option>
+                </select>
+            </div>
+
+            <div class="modal-box__close" style="display:flex;justify-content:space-between;">
+                <button type="button" class="btn btn-outline" id="addVehicleCloseBtn" th:text="#{vehicles.cancel}">İptal</button>
+                <button type="submit" class="btn btn-yellow" th:text="#{vehicles.save}">Kaydet</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/vehicles.js}"></script>
+</body>
+</html>

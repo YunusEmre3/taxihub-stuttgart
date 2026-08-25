@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${customer.firstName} + ' - TaxiHub Stuttgart'">Customer - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/customers.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('customers', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner" style="max-width:640px;" th:with="noRidesText=#{customers.table.noRidesYet}">
+        <h1 class="page-title" th:text="${customer.firstName + ' ' + customer.lastName}">Müşteri</h1>
+
+        <div class="panel" style="margin-bottom:20px;">
+            <div class="panel__header">
+                <h2 class="panel__title" th:text="#{customers.detail.stats}">İstatistikler</h2>
+            </div>
+            <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="kpi-card">
+                    <div class="kpi-card__label" th:text="#{customers.table.totalRides}">Total Rides</div>
+                    <div class="kpi-card__value" th:text="${customer.totalRides}">0</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-card__label" th:text="#{customers.table.lastRide}">Last Ride</div>
+                    <div class="kpi-card__value" style="font-size:16px;"
+                         th:text="${customer.lastRideAt != null ? #temporals.format(customer.lastRideAt, 'dd.MM.yyyy HH:mm') : noRidesText}">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel__header">
+                <h2 class="panel__title" th:text="#{customers.detail.title}">Müşteri Bilgileri</h2>
+            </div>
+
+            <form th:action="@{/customers/{id}(id=${customer.id})}" th:object="${customerForm}" method="post" class="customer-form">
+                <div class="form-group">
+                    <label for="firstName" th:text="#{customers.firstName}">Ad</label>
+                    <input type="text" id="firstName" th:field="*{firstName}"/>
+                    <div class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                </div>
+                <div class="form-group">
+                    <label for="lastName" th:text="#{customers.lastName}">Soyad</label>
+                    <input type="text" id="lastName" th:field="*{lastName}"/>
+                    <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email" th:text="#{customers.email}">E-posta</label>
+                    <input type="email" id="email" th:field="*{email}" readonly/>
+                </div>
+                <div class="form-group">
+                    <label for="phoneNumber" th:text="#{customers.phone}">Telefon</label>
+                    <input type="text" id="phoneNumber" th:field="*{phoneNumber}"/>
+                </div>
+                <div class="form-group">
+                    <label for="accountType" th:text="#{customers.accountType}">Hesap Türü</label>
+                    <select id="accountType" th:field="*{accountType}">
+                        <option th:each="type : ${accountTypes}" th:value="${type}" th:text="#{__${'enum.accountType.' + type}__}"></option>
+                    </select>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;margin-top:8px;">
+                    <a th:href="@{/customers}" class="btn btn-outline" th:text="#{customers.back}">Back</a>
+                    <button type="submit" class="btn btn-yellow" th:text="#{customers.save}">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

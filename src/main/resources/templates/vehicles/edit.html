@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${vehicle.plateNumber} + ' - TaxiHub Stuttgart'">Vehicle - TaxiHub Stuttgart</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/vehicles.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('vehicles', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner" style="max-width:640px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <h1 class="page-title" style="margin:0;" th:text="${vehicle.plateNumber}">S-TA 1001</h1>
+            <span class="badge" th:classappend="${vehicle.displayStatusCssClass}" th:text="#{__${'enum.vehicleDisplayStatus.' + vehicle.displayStatus}__}">Available</span>
+        </div>
+
+        <div class="panel">
+            <div class="panel__header">
+                <h2 class="panel__title" th:text="#{vehicles.detail.title}">Araç Bilgileri</h2>
+            </div>
+
+            <form th:action="@{/vehicles/{id}(id=${vehicle.id})}" th:object="${vehicleForm}" method="post" class="vehicle-form">
+                <div class="field-error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}" style="margin-bottom:14px;"></div>
+                <div class="vehicle-form-grid">
+                    <div class="form-group">
+                        <label for="plateNumber" th:text="#{vehicles.plateNumber}">Plaka</label>
+                        <input type="text" id="plateNumber" th:field="*{plateNumber}"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('plateNumber')}" th:errors="*{plateNumber}"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="year" th:text="#{vehicles.year}">Yıl</label>
+                        <input type="number" id="year" th:field="*{year}"/>
+                        <div class="field-error" th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="model" th:text="#{vehicles.model}">Model</label>
+                    <input type="text" id="model" th:field="*{model}"/>
+                    <div class="field-error" th:if="${#fields.hasErrors('model')}" th:errors="*{model}"></div>
+                </div>
+                <div class="vehicle-form-grid">
+                    <div class="form-group">
+                        <label for="vehicleType" th:text="#{vehicles.type}">Tip</label>
+                        <select id="vehicleType" th:field="*{vehicleType}">
+                            <option th:each="type : ${vehicleTypes}" th:value="${type}" th:text="#{__${'enum.vehicleType.' + type}__}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status" th:text="#{vehicles.status}">Durum</label>
+                        <select id="status" th:field="*{status}">
+                            <option th:each="s : ${statuses}" th:value="${s}" th:text="#{__${'enum.vehicleStatus.' + s}__}"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="vin" th:text="#{vehicles.vin}">VIN</label>
+                    <input type="text" id="vin" th:field="*{vin}" maxlength="17"/>
+                    <div class="field-error" th:if="${#fields.hasErrors('vin')}" th:errors="*{vin}"></div>
+                </div>
+                <div class="form-group">
+                    <label for="assignedDriverId" th:text="#{vehicles.assignDriverRequired}">Sürücü Ata</label>
+                    <select id="assignedDriverId" th:field="*{assignedDriverId}">
+                        <option value="" th:text="#{vehicles.unassignedOption}">-- Atanmamış --</option>
+                        <option th:each="driver : ${availableDrivers}" th:value="${driver.id}"
+                                th:text="${driver.firstName + ' ' + driver.lastName}"></option>
+                    </select>
+                </div>
+
+                <div style="display:flex;justify-content:space-between;margin-top:8px;">
+                    <a th:href="@{/vehicles}" class="btn btn-outline" th:text="#{vehicles.back}">Back</a>
+                    <button type="submit" class="btn btn-yellow" th:text="#{vehicles.save}">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

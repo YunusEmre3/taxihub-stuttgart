@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{employeeDashboard.pageTitle}">Panel - TaxiHub Stuttgart</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('dashboard', '/dashboard', false)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'EMPLOYEE')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <h1 class="page-title" th:text="#{employeeDashboard.title}">Personel Paneli</h1>
+
+        <div class="kpi-grid" style="grid-template-columns: 1fr;">
+            <div class="kpi-card" style="max-width:260px;">
+                <div class="kpi-card__label" th:text="#{employeeDashboard.todayCompletedCount}">Bugün Tamamladığın İş Sayısı</div>
+                <div class="kpi-card__value" th:text="${todayCompletedCount}">0</div>
+            </div>
+        </div>
+
+        <!-- Aktif iş varsa: PENDING listesi yerine bu kart gösterilir -->
+        <div class="active-job-card" th:if="${activeBooking != null}">
+            <div class="active-job-card__title" th:text="#{employeeDashboard.activeJob}">Aktif İşin</div>
+
+            <div class="active-job-card__grid">
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{employeeDashboard.customer}">Müşteri</div>
+                    <div class="active-job-card__field-value" th:text="${activeBooking.firstName + ' ' + activeBooking.lastName}">Ad Soyad</div>
+                </div>
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{booking.table.phone}">Telefon</div>
+                    <div class="active-job-card__field-value" th:text="${activeBooking.phoneNumber}">-</div>
+                </div>
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{employeeDashboard.dateTime}">Tarih / Saat</div>
+                    <div class="active-job-card__field-value"
+                         th:text="${#temporals.format(activeBooking.bookingDate, 'dd.MM.yyyy') + ' ' + #temporals.format(activeBooking.bookingTime, 'HH:mm')}">-</div>
+                </div>
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{booking.table.vehicleType}">Araç Tipi</div>
+                    <div class="active-job-card__field-value" th:text="#{__${'enum.vehicleType.' + activeBooking.vehicleType}__}">-</div>
+                </div>
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{employeeDashboard.pickupPoint}">Alış Noktası</div>
+                    <div class="active-job-card__field-value" th:text="${activeBooking.pickupAddress}">-</div>
+                </div>
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{employeeDashboard.dropoffPoint}">Varış Noktası</div>
+                    <div class="active-job-card__field-value" th:text="${activeBooking.dropoffAddress}">-</div>
+                </div>
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{employeeDashboard.passengerLuggage}">Yolcu / Bagaj</div>
+                    <div class="active-job-card__field-value" th:text="${activeBooking.passengerCount + ' / ' + activeBooking.luggageCount}">-</div>
+                </div>
+                <div>
+                    <div class="active-job-card__field-label" th:text="#{employeeDashboard.status}">Durum</div>
+                    <div class="active-job-card__field-value">
+                        <span class="badge" th:classappend="${activeBooking.status.cssClass}" th:text="#{__${'enum.bookingStatus.' + activeBooking.status}__}">Assigned</span>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${activeBooking.customerMessage != null}" style="margin-bottom:16px;">
+                <div class="active-job-card__field-label" th:text="#{employeeDashboard.customerNote}">Müşteri Notu</div>
+                <div class="active-job-card__field-value" th:text="${activeBooking.customerMessage}" style="font-weight:400;"></div>
+            </div>
+
+            <button type="button" class="btn btn-yellow" id="completeTripBtn" th:attr="data-booking-id=${activeBooking.id}" th:text="#{employeeDashboard.completeTrip}">
+                İşi Tamamla
+            </button>
+        </div>
+
+        <!-- Aktif iş yoksa: PENDING (atanmamış) rezervasyonlar -->
+        <div class="panel" th:if="${activeBooking == null}">
+            <div class="panel__header">
+                <h2 class="panel__title" th:text="#{employeeDashboard.pendingBookings}">Bekleyen Rezervasyonlar</h2>
+            </div>
+
+            <table class="data-table" th:if="${not #lists.isEmpty(pendingBookings)}">
+                <thead>
+                <tr>
+                    <th th:text="#{booking.table.id}">Booking ID</th>
+                    <th th:text="#{booking.table.customerName}">Customer Name</th>
+                    <th th:text="#{booking.table.email}">Email</th>
+                    <th th:text="#{booking.table.phone}">Phone</th>
+                    <th th:text="#{booking.table.dateTime}">Date/Time</th>
+                    <th th:text="#{booking.table.pickupAddress}">Pickup Address</th>
+                    <th th:text="#{booking.table.dropoffAddress}">Drop-off Address</th>
+                    <th th:text="#{booking.table.vehicleType}">Vehicle Type</th>
+                    <th th:text="#{booking.table.passengerLuggage}">Passenger/Luggage</th>
+                    <th th:text="#{booking.table.status}">Status</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="booking : ${pendingBookings}">
+                    <td th:text="${booking.bookingCode}">PNR2283</td>
+                    <td th:text="${booking.firstName + ' ' + booking.lastName}">Ad Soyad</td>
+                    <td th:text="${booking.email}">mail@example.com</td>
+                    <td th:text="${booking.phoneNumber}">0151 000000</td>
+                    <td th:text="${#temporals.format(booking.bookingDate, 'dd.MM.yyyy') + ' ' + #temporals.format(booking.bookingTime, 'HH:mm')}">01.01.2026 10:00</td>
+                    <td th:text="${booking.pickupAddress}">Abholort</td>
+                    <td th:text="${booking.dropoffAddress}">Zielort</td>
+                    <td th:text="#{__${'enum.vehicleType.' + booking.vehicleType}__}">STANDARD</td>
+                    <td th:text="${booking.passengerCount + ' / ' + booking.luggageCount}">2 / 1</td>
+                    <td><span class="badge" th:classappend="${booking.status.cssClass}" th:text="#{__${'enum.bookingStatus.' + booking.status}__}">Pending</span></td>
+                    <td>
+                        <button type="button" class="btn btn-yellow btn-small assign-btn" th:attr="data-booking-id=${booking.id}" th:text="#{employeeDashboard.assignToMe}">
+                            Assign to Me
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="empty-state" th:if="${#lists.isEmpty(pendingBookings)}" th:text="#{employeeDashboard.noPendingBookings}">Şu anda bekleyen rezervasyon yok.</div>
+        </div>
+    </div>
+</main>
+
+<div class="toast" id="errorToast"></div>
+
+<script th:src="@{/js/dashboard.js}"></script>
+</body>
+</html>

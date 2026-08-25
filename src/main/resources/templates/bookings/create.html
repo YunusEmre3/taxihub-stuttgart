@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{bookingCreate.pageTitle}">Yeni Rezervasyon - TaxiHub Stuttgart</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/booking-form.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('bookings', ${dashboardUrl}, true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, ${roleLabel})}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <h1 class="page-title" th:text="#{bookingCreate.title}">Yeni Rezervasyon Oluştur</h1>
+
+        <form th:action="@{/bookings}" th:object="${bookingForm}" method="post" id="bookingForm">
+
+            <div class="create-booking-layout">
+                <!-- SOL: form alanları -->
+                <div>
+                    <div class="panel form-section">
+                        <div class="form-columns">
+                            <!-- Customer Information -->
+                            <div>
+                                <h2 class="form-section__title" th:text="#{bookingCreate.customerInfo}">Customer Information</h2>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="lastName" th:text="#{bookingCreate.lastName}">Last Name *</label>
+                                        <input type="text" id="lastName" th:field="*{lastName}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="firstName" th:text="#{bookingCreate.firstName}">First Name *</label>
+                                        <input type="text" id="firstName" th:field="*{firstName}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email" th:text="#{bookingCreate.email}">Email *</label>
+                                        <input type="email" id="email" th:field="*{email}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phoneNumber" th:text="#{bookingCreate.phone}">Phone *</label>
+                                        <input type="text" id="phoneNumber" th:field="*{phoneNumber}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                                    </div>
+                                    <div class="form-group form-group--full">
+                                        <label for="customerMessage" th:text="#{bookingCreate.notes}">Notes</label>
+                                        <textarea id="customerMessage" th:field="*{customerMessage}"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Trip Details -->
+                            <div>
+                                <h2 class="form-section__title" th:text="#{bookingCreate.tripDetails}">Trip Details</h2>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="bookingDate" th:text="#{bookingCreate.date}">Date *</label>
+                                        <input type="date" id="bookingDate" th:field="*{bookingDate}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('bookingDate')}" th:errors="*{bookingDate}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bookingTime" th:text="#{bookingCreate.time}">Time *</label>
+                                        <input type="time" id="bookingTime" th:field="*{bookingTime}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('bookingTime')}" th:errors="*{bookingTime}"></div>
+                                    </div>
+                                    <div class="form-group form-group--full">
+                                        <label for="pickupAddress" th:text="#{bookingCreate.pickupAddress}">Pickup Address *</label>
+                                        <input type="text" id="pickupAddress" th:field="*{pickupAddress}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('pickupAddress')}" th:errors="*{pickupAddress}"></div>
+                                    </div>
+                                    <div class="form-group form-group--full">
+                                        <label for="dropoffAddress" th:text="#{bookingCreate.dropoffAddress}">Drop-off Address *</label>
+                                        <input type="text" id="dropoffAddress" th:field="*{dropoffAddress}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('dropoffAddress')}" th:errors="*{dropoffAddress}"></div>
+                                    </div>
+                                    <!-- "Show Route" başarılı olunca booking-create.js bunları dolduruyor; dispatch haritasında pin göstermek için kullanılıyor. -->
+                                    <input type="hidden" id="pickupLat" th:field="*{pickupLat}"/>
+                                    <input type="hidden" id="pickupLng" th:field="*{pickupLng}"/>
+                                    <div class="form-group">
+                                        <label for="vehicleType" th:text="#{bookingCreate.vehicleType}">Vehicle Type *</label>
+                                        <select id="vehicleType" th:field="*{vehicleType}">
+                                            <option value="" th:text="#{bookingCreate.selectPlaceholder}">-- Seçiniz --</option>
+                                            <option th:each="type : ${vehicleTypes}" th:value="${type}" th:text="#{__${'enum.vehicleType.' + type}__}"></option>
+                                        </select>
+                                        <div class="field-error" th:if="${#fields.hasErrors('vehicleType')}" th:errors="*{vehicleType}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="passengerCount" th:text="#{bookingCreate.passengerCount}">Passenger Count *</label>
+                                        <input type="number" id="passengerCount" min="1" th:field="*{passengerCount}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('passengerCount')}" th:errors="*{passengerCount}"></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="luggageCount" th:text="#{bookingCreate.luggageCount}">Luggage Count *</label>
+                                        <input type="number" id="luggageCount" min="1" th:field="*{luggageCount}"/>
+                                        <div class="field-error" th:if="${#fields.hasErrors('luggageCount')}" th:errors="*{luggageCount}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel form-section">
+                        <div class="form-columns">
+                            <!-- Vehicle & Driver Selection -->
+                            <div>
+                                <h2 class="form-section__title" th:text="#{bookingCreate.vehicleDriverSelection}">Vehicle &amp; Driver Selection</h2>
+                                <div class="form-group">
+                                    <label for="assignedEmployeeId" th:text="#{bookingCreate.optionalDriver}">Optional Driver Assignment</label>
+                                    <select id="assignedEmployeeId" th:field="*{assignedEmployeeId}">
+                                        <option value="" th:text="#{bookingCreate.unassignedOption}">-- Atanmamış --</option>
+                                        <option th:each="employee : ${availableEmployees}"
+                                                th:value="${employee.id}"
+                                                th:text="${employee.firstName + ' ' + employee.lastName}"></option>
+                                    </select>
+                                    <div class="field-error" th:if="${#fields.hasErrors('assignedEmployeeId')}" th:errors="*{assignedEmployeeId}"></div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Information -->
+                            <div>
+                                <h2 class="form-section__title" th:text="#{bookingCreate.paymentInfo}">Payment Information</h2>
+                                <div class="form-group">
+                                    <label for="paymentMethod" th:text="#{bookingCreate.paymentMethod}">Payment Method</label>
+                                    <select id="paymentMethod" th:field="*{paymentMethod}">
+                                        <option value="" th:text="#{bookingCreate.selectPlaceholder}">-- Seçiniz --</option>
+                                        <option th:each="method : ${paymentMethods}" th:value="${method}" th:text="#{__${'enum.paymentMethod.' + method}__}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SAĞ: harita paneli -->
+                <div class="map-panel">
+                    <h2 class="map-panel__title" th:text="#{bookingCreate.routeAndPrice}">Rota &amp; Tahmini Fiyat</h2>
+
+                    <div id="routeMap"></div>
+
+                    <div class="route-status" id="routeStatus"></div>
+
+                    <div class="route-stats" id="routeStats" style="display:none;">
+                        <div class="route-stat">
+                            <div class="route-stat__label" th:text="#{bookingCreate.distance}">Mesafe</div>
+                            <div class="route-stat__value" id="distanceStat">-</div>
+                        </div>
+                        <div class="route-stat">
+                            <div class="route-stat__label" th:text="#{bookingCreate.duration}">Süre</div>
+                            <div class="route-stat__value" id="durationStat">-</div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline" id="showRouteBtn" style="width:100%;margin-bottom:12px;" th:text="#{bookingCreate.showRoute}">
+                        Show Route
+                    </button>
+
+                    <div class="form-group">
+                        <label for="estimatedPrice" th:text="#{bookingCreate.estimatedPrice}">Estimated Price</label>
+                        <input type="text" id="estimatedPrice" readonly th:placeholder="#{bookingCreate.estimatedPricePlaceholder}"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <a th:href="@{${dashboardUrl}}" class="btn btn-outline" th:text="#{bookingCreate.back}">Back</a>
+                <button type="submit" class="btn btn-yellow" th:text="#{bookingCreate.submit}">Create Booking</button>
+            </div>
+        </form>
+    </div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/booking-create.js}"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Sol sabit sidebar. activeMenu: hangi menü öğesinin vurgulanacağını, dashboardUrl: role'e göre doğru dashboard linkini, isAdmin: Bookings linkinin gösterilip gösterilmeyeceğini belirler (rezervasyon oluşturma sadece ADMIN'e açık). -->
+<nav th:fragment="sidebar(activeMenu, dashboardUrl, isAdmin)" class="app-sidebar">
+    <div class="app-sidebar__brand">
+        TAXI<span>HUB</span>
+    </div>
+
+    <ul class="app-sidebar__menu">
+        <li>
+            <a th:href="@{${dashboardUrl}}" th:classappend="${activeMenu == 'dashboard'} ? 'active'">
+                <span class="app-sidebar__icon">&#9632;</span> <span th:text="#{sidebar.dashboard}">Dashboard</span>
+            </a>
+        </li>
+        <li th:if="${isAdmin}">
+            <a th:href="@{/bookings/new}" th:classappend="${activeMenu == 'bookings'} ? 'active'">
+                <span class="app-sidebar__icon">&#9632;</span> <span th:text="#{sidebar.bookings}">Bookings</span>
+            </a>
+        </li>
+        <li th:if="${isAdmin}">
+            <a th:href="@{/drivers}" th:classappend="${activeMenu == 'drivers'} ? 'active'">
+                <span class="app-sidebar__icon">&#9632;</span> <span th:text="#{sidebar.drivers}">Drivers</span>
+            </a>
+        </li>
+        <li th:if="${isAdmin}">
+            <a th:href="@{/customers}" th:classappend="${activeMenu == 'customers'} ? 'active'">
+                <span class="app-sidebar__icon">&#9632;</span> <span th:text="#{sidebar.customers}">Customers</span>
+            </a>
+        </li>
+        <li th:if="${isAdmin}">
+            <a th:href="@{/vehicles}" th:classappend="${activeMenu == 'vehicles'} ? 'active'">
+                <span class="app-sidebar__icon">&#9632;</span> <span th:text="#{sidebar.vehicles}">Vehicles</span>
+            </a>
+        </li>
+        <li th:if="${isAdmin}">
+            <a th:href="@{/reports}" th:classappend="${activeMenu == 'reports'} ? 'active'">
+                <span class="app-sidebar__icon">&#9632;</span> <span th:text="#{sidebar.reports}">Reports</span>
+            </a>
+        </li>
+        <li th:if="${isAdmin}">
+            <a th:href="@{/settings}" th:classappend="${activeMenu == 'settings'} ? 'active'">
+                <span class="app-sidebar__icon">&#9632;</span> <span th:text="#{sidebar.settings}">Settings</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<!-- Üst header. displayName + role kullanıcı dropdown'ında gösterilir. -->
+<header th:fragment="topbar(displayName, roleLabel)" class="app-topbar">
+    <button type="button" class="app-topbar__hamburger" id="sidebarToggle" th:aria-label="#{topbar.toggleMenu}">&#9776;</button>
+
+    <div class="app-topbar__right">
+        <div class="lang-switcher lang-switcher--topbar">
+            <a th:href="@{''(lang=tr)}" th:classappend="${#locale.language == 'tr'} ? ' active'">TR</a>
+            <a th:href="@{''(lang=de)}" th:classappend="${#locale.language == 'de'} ? ' active'">DE</a>
+            <a th:href="@{''(lang=en)}" th:classappend="${#locale.language == 'en'} ? ' active'">EN</a>
+        </div>
+
+        <span class="app-topbar__bell" th:title="#{topbar.notifications}">&#128276;</span>
+
+        <div class="app-topbar__user" id="userMenuToggle">
+            <span class="app-topbar__user-name" th:text="${displayName}">Kullanıcı</span>
+            <span class="app-topbar__user-role" th:text="#{__${'enum.role.' + roleLabel}__}">Rol</span>
+            <div class="app-topbar__dropdown" id="userMenuDropdown">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="app-topbar__logout" th:text="#{common.logout}">Çıkış Yap</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</header>
+
+</body>
+</html>

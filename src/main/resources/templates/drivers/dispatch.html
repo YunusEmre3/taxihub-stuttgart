@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="#{dispatch.pageTitle}">Drivers - TaxiHub Stuttgart</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"/>
+    <link rel="stylesheet" th:href="@{/css/dispatch.css}"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/layout :: sidebar('drivers', '/admin/dashboard', true)}"></div>
+<div th:replace="~{fragments/layout :: topbar(${employeeName}, 'ADMIN')}"></div>
+
+<main class="app-main">
+    <div class="app-main__inner">
+        <h1 class="page-title" th:text="#{dispatch.title}">Drivers</h1>
+        <p class="dispatch-hint" th:text="#{dispatch.hint}">Bir rezervasyonu sürükleyip bir sürücünün üzerine bırak, ya da rezervasyona tıklayıp ardından sürücüye tıkla.</p>
+
+        <div class="dispatch-layout">
+            <div id="dispatchMap"></div>
+
+            <div class="dispatch-side">
+                <div class="dispatch-panel dispatch-panel--bookings">
+                    <h2 class="dispatch-panel__title" th:text="#{dispatch.unassignedBookings}">Unassigned Bookings</h2>
+
+                    <ul class="dispatch-list" th:if="${not #lists.isEmpty(pendingBookings)}">
+                        <li th:each="booking : ${pendingBookings}"
+                            class="booking-card"
+                            draggable="true"
+                            th:attr="data-booking-id=${booking.id},
+                                      data-code=${booking.bookingCode},
+                                      data-name=${booking.firstName + ' ' + booking.lastName},
+                                      data-pickup=${booking.pickupAddress},
+                                      data-lat=${booking.pickupLat},
+                                      data-lng=${booking.pickupLng}">
+                            <div class="booking-card__code" th:text="'#' + ${booking.bookingCode}">#PNR2283</div>
+                            <div class="booking-card__name" th:text="${booking.firstName + ' ' + booking.lastName}">Ad Soyad</div>
+                            <div class="booking-card__pickup" th:text="${booking.pickupAddress}">Abholort</div>
+                        </li>
+                    </ul>
+                    <div class="dispatch-empty" th:if="${#lists.isEmpty(pendingBookings)}" th:text="#{dispatch.noPendingBookings}">Bekleyen rezervasyon yok.</div>
+                </div>
+
+                <div class="dispatch-panel dispatch-panel--drivers">
+                    <h2 class="dispatch-panel__title" th:text="#{dispatch.availableDrivers}">Available Drivers</h2>
+
+                    <div style="overflow-y:auto;" th:if="${not #lists.isEmpty(availableDrivers)}">
+                        <table class="driver-table">
+                            <thead>
+                            <tr>
+                                <th th:text="#{dispatch.name}">Name</th>
+                                <th th:text="#{dispatch.status}">Durum</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="driver : ${availableDrivers}"
+                                class="driver-row"
+                                th:attr="data-employee-id=${driver.id},
+                                          data-name=${driver.firstName + ' ' + driver.lastName},
+                                          data-lat=${driver.currentLat},
+                                          data-lng=${driver.currentLng}">
+                                <td th:text="${driver.firstName + ' ' + driver.lastName}">Ad Soyad</td>
+                                <td><span class="badge badge-completed" th:text="#{dispatch.idle}">Boşta</span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="dispatch-empty" th:if="${#lists.isEmpty(availableDrivers)}" th:text="#{dispatch.noIdleDrivers}">Şu anda boşta sürücü yok.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast" id="errorToast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script th:src="@{/js/dashboard.js}"></script>
+<script th:src="@{/js/driver-dispatch.js}"></script>
+</body>
+</html>

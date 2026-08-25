@@ -1,0 +1,60 @@
+/* Extends dashboard.css (.panel, .kpi-grid, .kpi-card, .btn already come
+   from there) with the filter bar and chart grid this page needs. */
+
+.reports-filterbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.reports-filterbar__spacer {
+    flex: 1;
+}
+
+.reports-filterbar label {
+    font-size: 12px;
+    color: var(--th-gray);
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.reports-filterbar input,
+.reports-filterbar select {
+    padding: 8px 10px;
+    border: 1.5px solid var(--th-border);
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.chart-panel {
+    background: var(--th-white);
+    border: 1px solid var(--th-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+}
+
+.chart-panel__title {
+    font-size: 14.5px;
+    font-weight: 800;
+    margin: 0 0 14px;
+}
+
+.chart-panel canvas {
+    max-height: 260px;
+}
+
+.chart-empty {
+    color: var(--th-gray);
+    font-size: 13px;
+    text-align: center;
+    padding: 40px 0;
+}
